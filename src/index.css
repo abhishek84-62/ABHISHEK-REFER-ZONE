@@ -14,10 +14,10 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    @apply bg-neutral-900/70 backdrop-blur-sm border border-white/15 shadow-xl;
   }
   .glass-dark {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5;
+    @apply bg-neutral-950/85 backdrop-blur-md border border-white/10 shadow-2xl;
   }
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white/90 to-white/50;
@@ -40,4 +40,85 @@
 
 .animate-rotate-slow {
   animation: rotate-slow 20s linear infinite;
+}
+
+/* ======= BLACK HOLE ======= */
+@keyframes accretion-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes accretion-spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes event-horizon-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 50px 20px rgba(255, 140, 0, 0.35),
+      0 0 100px 40px rgba(255, 69, 0, 0.15),
+      inset 0 0 60px 30px rgba(0,0,0,0.9);
+  }
+  50% {
+    box-shadow:
+      0 0 75px 30px rgba(255, 160, 0, 0.45),
+      0 0 140px 60px rgba(255, 69, 0, 0.2),
+      inset 0 0 80px 40px rgba(0,0,0,0.95);
+  }
+}
+
+@keyframes warp-ring {
+  0%   { transform: scale(1) rotate(0deg); opacity: 0.5; }
+  50%  { transform: scale(1.08) rotate(180deg); opacity: 0.9; }
+  100% { transform: scale(1) rotate(360deg); opacity: 0.5; }
+}
+
+@keyframes singularity-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.03); }
+}
+
+@keyframes particle-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-accretion       { animation: accretion-spin 8s linear infinite; will-change: transform; backface-visibility: hidden; }
+.animate-accretion-rev   { animation: accretion-spin-reverse 5s linear infinite; will-change: transform; backface-visibility: hidden; }
+.animate-horizon-pulse   { animation: event-horizon-pulse 3s ease-in-out infinite; will-change: box-shadow; }
+.animate-warp-ring       { animation: warp-ring 4s ease-in-out infinite; will-change: transform; }
+.animate-singularity     { animation: singularity-breathe 3s ease-in-out infinite; will-change: transform; }
+.animate-particle-orbit  { animation: particle-orbit linear infinite; will-change: transform; backface-visibility: hidden; }
+
+/* ======= COINS SPIRAL INTO BLACK HOLE ======= */
+@keyframes spiral-consume {
+  0% {
+    transform: translate3d(var(--sx), var(--sy), 0) rotate(0deg) scale(1);
+    opacity: 0;
+  }
+  5% {
+    opacity: var(--coin-opacity, 0.8);
+  }
+  55% {
+    transform: translate3d(calc(var(--sx) * 0.2), calc(var(--sy) * 0.2), 0) rotate(1440deg) scale(0.7);
+    opacity: var(--coin-opacity, 0.8);
+  }
+  75% {
+    transform: translate3d(calc(var(--sx) * 0.04), calc(var(--sy) * 0.04), 0) rotate(2520deg) scale(0.15);
+    opacity: 0.3;
+  }
+  85% {
+    transform: translate3d(0px, 0px, 0) rotate(3240deg) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(0px, 0px, 0) rotate(3600deg) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-spiral-in {
+  animation: spiral-consume ease-in infinite;
+  backface-visibility: hidden;
 }

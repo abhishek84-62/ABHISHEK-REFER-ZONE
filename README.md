@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# DOT ARN ₹$ — Live Referral Offers Platform
 
-# Run and deploy your AI Studio app
+An interactive affiliate referral offers platform with animated 3D black hole background, floating currency coins, Google Sheets data integration, search & filtering, social links, and an owner dashboard.
 
-This contains everything you need to run your app locally.
+## 🚀 Features
 
-View your app in AI Studio: https://ai.studio/apps/9d610d86-7fcf-422a-a56d-8d1b3222a6b8
+- **Black Hole & Coin Swarm Effect**: High-performance GPU-accelerated background animation.
+- **Google Sheets Integration**: Dynamically syncs live referral offers from Google Sheets.
+- **Search & Filter**: Find active referral offers instantly.
+- **Owner Dashboard**: Customize site title, bio, social links, theme accent colors, and cosmic security key.
+- **WhatsApp & Social Integration**: Floating WhatsApp contact button and social header/footer links.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+## 🛠️ Setup & Local Development
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Start dev server:
+   ```bash
+   npm run dev
+   ```
+
+3. Open in browser: `http://localhost:3000`
