@@ -150,13 +150,21 @@ export default function App() {
       const jsonStr = text.substring(47).slice(0, -2);
       const jd = JSON.parse(jsonStr);
 
-      const cols = jd.table.cols.map((c: any) => (c.label || '').trim().toLowerCase());
-      const rows = jd.table.rows || [];
+      const rawRows = jd.table.rows || [];
+      let headerCols = (jd.table.cols || []).map((c: any) => (c.label || '').trim().toLowerCase());
+      let dataRows = rawRows;
 
-      // Rule 10: Always locate columns by matching header names in Row 1
+      // Extract headers from Row 1 if table.cols labels are empty
+      const hasColLabels = headerCols.some((l: string) => l.length > 0);
+      if (!hasColLabels && rawRows.length > 0) {
+        headerCols = (rawRows[0].c || []).map((cell: any) => (cell && cell.v !== null && cell.v !== undefined ? String(cell.v).trim().toLowerCase() : ''));
+        dataRows = rawRows.slice(1); // Row 2 onwards
+      }
+
+      // Rule 10: Always locate columns by matching header names
       const findIdx = (names: string[]) => {
         for (const name of names) {
-          const i = cols.findIndex((c: string) => c === name || c.includes(name));
+          const i = headerCols.findIndex((c: string) => c === name || c.includes(name));
           if (i > -1) return i;
         }
         return -1;
@@ -164,7 +172,7 @@ export default function App() {
 
       const idx = {
         logo: findIdx(['logo', 'icon', 'img', 'image', 'emoji']),
-        app: findIdx(['app name', 'app', 'name']),
+        app: findIdx(['app', 'name']),
         amt: findIdx(['ammount', 'amount', 'amt', 'reward', 'earn']),
         task: findIdx(['task', 'description', 'desc']),
         clm: findIdx(['link', 'claim', 'url', 'clm']),
@@ -180,8 +188,8 @@ export default function App() {
 
       const fetchedOffers: Offer[] = [];
 
-      // Rule 2 & 11: Loop rows starting from Row 2 onwards
-      for (const r of rows) {
+      // Rule 2 & 11: Loop data rows starting from Row 2 onwards
+      for (const r of dataRows) {
         if (!r || !r.c) continue;
 
         const app = getValue(r, idx.app);
