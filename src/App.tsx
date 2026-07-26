@@ -34,12 +34,14 @@ import {
 
 // --- Types ---
 interface Offer {
+  logo: string;
   app: string;
-  task: string;
   amt: string;
-  tc: string;
+  task: string;
   clm: string;
+  tc: string;
   trk: string;
+  active: string;
 }
 
 interface Branding {
@@ -138,9 +140,9 @@ export default function App() {
     document.title = branding.name || 'DOT ARN ₹$';
   }, [branding.name]);
 
-  // --- Data Fetching (UNCHANGED) ---
-  const fetchOffers = useCallback(async () => {
-    setLoading(true);
+  // --- Data Fetching (Strict Rules 1-12) ---
+  const fetchOffers = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${GURL}&_=${Date.now()}`);
@@ -149,56 +151,87 @@ export default function App() {
       const jd = JSON.parse(jsonStr);
 
       const cols = jd.table.cols.map((c: any) => (c.label || '').trim().toLowerCase());
-      const rows = jd.table.rows;
+      const rows = jd.table.rows || [];
 
+      // Rule 10: Always locate columns by matching header names in Row 1
       const findIdx = (names: string[]) => {
         for (const name of names) {
-          const i = cols.findIndex((c: string) => c.includes(name));
+          const i = cols.findIndex((c: string) => c === name || c.includes(name));
           if (i > -1) return i;
         }
         return -1;
       };
 
       const idx = {
+        logo: findIdx(['logo', 'icon', 'img', 'image', 'emoji']),
         app: findIdx(['app name', 'app', 'name']),
-        task: findIdx(['task']),
-        amt: findIdx(['amount', 'ammount', 'amt', 'reward', 'earn']),
-        tc: findIdx(['t&c', 'tc', 'term', 'condition']),
-        clm: findIdx(['claim', 'link', 'url']),
-        trk: findIdx(['tracker', 'track']),
+        amt: findIdx(['ammount', 'amount', 'amt', 'reward', 'earn']),
+        task: findIdx(['task', 'description', 'desc']),
+        clm: findIdx(['link', 'claim', 'url', 'clm']),
+        tc: findIdx(['t&c', 'tc', 'term', 'condition', 'terms']),
+        trk: findIdx(['tracker', 'track', 'trk']),
+        active: findIdx(['active', 'status', 'enabled', 'show']),
       };
 
-      // Fallbacks
-      if (idx.app < 0) idx.app = 0;
-      if (idx.task < 0) idx.task = 1;
-      if (idx.amt < 0) idx.amt = 2;
-      if (idx.tc < 0) idx.tc = 3;
-      if (idx.clm < 0) idx.clm = 4;
-      if (idx.trk < 0) idx.trk = 5;
+      const getValue = (r: any, i: number) =>
+        i >= 0 && r.c && r.c[i] && r.c[i].v !== null && r.c[i].v !== undefined
+          ? String(r.c[i].v).trim()
+          : '';
 
-      const getValue = (r: any, i: number) => (i >= 0 && r.c[i] ? String(r.c[i].v || '') : '');
+      const fetchedOffers: Offer[] = [];
 
-      const fetchedOffers = rows.map((r: any) => ({
-        app: getValue(r, idx.app),
-        task: getValue(r, idx.task),
-        amt: getValue(r, idx.amt),
-        tc: getValue(r, idx.tc),
-        clm: getValue(r, idx.clm),
-        trk: getValue(r, idx.trk),
-      })).filter((o: Offer) => o.app.trim());
+      // Rule 2 & 11: Loop rows starting from Row 2 onwards
+      for (const r of rows) {
+        if (!r || !r.c) continue;
+
+        const app = getValue(r, idx.app);
+        const amt = getValue(r, idx.amt);
+        const clm = getValue(r, idx.clm);
+        const task = getValue(r, idx.task);
+        const tc = getValue(r, idx.tc);
+        const trk = getValue(r, idx.trk);
+        const logo = getValue(r, idx.logo);
+        const activeRaw = getValue(r, idx.active).toLowerCase();
+
+        // Rule 5: ACTIVE column controls visibility. If ACTIVE != "yes", skip row completely.
+        if (idx.active >= 0 && activeRaw !== 'yes') {
+          continue;
+        }
+
+        // Rule 9: If required fields missing (APP, LINK/CLM, or AMMOUNT), skip completely.
+        if (!app || !clm || !amt) {
+          continue;
+        }
+
+        fetchedOffers.push({
+          logo,
+          app,
+          amt,
+          task,
+          clm,
+          tc,
+          trk,
+          active: activeRaw || 'yes',
+        });
+      }
 
       setOffers(fetchedOffers);
       setLastRefresh(new Date().toLocaleTimeString());
     } catch (err) {
       console.error(err);
-      setError('Failed to load offers. Please check your Google Sheet permissions.');
+      if (!isSilent) setError('Failed to load offers. Please check your Google Sheet permissions.');
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchOffers();
+    // Rule 12: Auto-sync every 30 seconds so Google Sheets edits reflect automatically
+    const interval = setInterval(() => {
+      fetchOffers(true);
+    }, 30000);
+    return () => clearInterval(interval);
   }, [fetchOffers]);
 
   // --- Toast System ---
@@ -597,7 +630,7 @@ export default function App() {
           ) : error ? (
             <div className="glass-dark rounded-3xl p-12 text-center border-red-500/20">
               <p className="text-red-400 mb-4">{error}</p>
-              <button onClick={fetchOffers} className="text-white/60 hover:text-white underline underline-offset-4">Try Again</button>
+              <button onClick={() => fetchOffers()} className="text-white/60 hover:text-white underline underline-offset-4">Try Again</button>
             </div>
           ) : filteredOffers.length === 0 ? (
             <div className="glass-dark rounded-3xl p-12 text-center border-white/5">
@@ -620,8 +653,16 @@ export default function App() {
                   <div className="p-8">
                     <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-2xl shadow-inner">
-                          {offer.app.charAt(0)}
+                        <div className="w-14 h-14 rounded-2xl glass border-white/10 flex items-center justify-center text-2xl shadow-inner overflow-hidden shrink-0">
+                          {offer.logo ? (
+                            offer.logo.startsWith('http://') || offer.logo.startsWith('https://') || offer.logo.startsWith('data:') ? (
+                              <img src={offer.logo} alt={offer.app} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{offer.logo}</span>
+                            )
+                          ) : (
+                            <span>{offer.app.charAt(0).toUpperCase()}</span>
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
