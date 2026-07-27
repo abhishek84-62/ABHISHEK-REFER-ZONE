@@ -121,4 +121,60 @@
 .animate-spiral-in {
   animation: spiral-consume ease-in infinite;
   backface-visibility: hidden;
+  will-change: transform, opacity;
+  contain: layout style;
+}
+
+/* ======= GPU COMPOSITING HINTS ======= */
+.glass,
+.glass-dark {
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* ======= MOBILE PERFORMANCE ======= */
+@media (max-width: 768px) {
+  .glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    @apply bg-neutral-900/85;
+  }
+  .glass-dark {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    @apply bg-neutral-950/90;
+  }
+  /* Simplify black hole on mobile */
+  .animate-accretion,
+  .animate-accretion-rev {
+    filter: none !important;
+  }
+  .animate-particle-orbit {
+    display: none;
+  }
+}
+
+/* ======= TOUCH SMOOTHNESS ======= */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ======= REDUCED MOTION ======= */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spiral-in,
+  .animate-accretion,
+  .animate-accretion-rev,
+  .animate-horizon-pulse,
+  .animate-warp-ring,
+  .animate-singularity,
+  .animate-particle-orbit,
+  .animate-float,
+  .animate-rotate-slow {
+    animation: none !important;
+  }
 }
