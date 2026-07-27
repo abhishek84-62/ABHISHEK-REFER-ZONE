@@ -398,18 +398,21 @@ export default function App() {
     </div>
   );
 
-  // --- Floating Coins (UNCHANGED) ---
+  // --- Floating Coins ---
   const COIN_SYMBOLS = ['₹', '$', '€', '£', '¥', '🪙', '💰', '💵', '💲'];
   const coins = useMemo(() => {
-    return Array.from({ length: 40 }, (_, i) => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const count = isMobile ? 18 : 40;
+    const maxRadius = isMobile ? 280 : 550;
+    return Array.from({ length: count }, (_, i) => {
       const symbol = COIN_SYMBOLS[i % COIN_SYMBOLS.length];
-      const angle = (Math.PI * 2 * i / 40) + (Math.random() * 0.5 - 0.25);
-      const radius = 350 + Math.random() * 550;
+      const angle = (Math.PI * 2 * i / count) + (Math.random() * 0.5 - 0.25);
+      const radius = 350 + Math.random() * maxRadius;
       const sx = Math.cos(angle) * radius;
       const sy = Math.sin(angle) * radius;
       const size = 18 + Math.random() * 28;
       const duration = 3 + Math.random() * 5;
-      const delay = (i / 40) * 7 + Math.random() * 1;
+      const delay = (i / count) * 7 + Math.random() * 1;
       const opacity = 0.45 + Math.random() * 0.45;
       return { symbol, sx, sy, size, duration, delay, opacity, id: i };
     });
@@ -638,7 +641,7 @@ export default function App() {
           ) : error ? (
             <div className="glass-dark rounded-3xl p-12 text-center border-red-500/20">
               <p className="text-red-400 mb-4">{error}</p>
-              <button onClick={() => fetchOffers()} className="text-white/60 hover:text-white underline underline-offset-4">Try Again</button>
+              <button onClick={fetchOffers} className="text-white/60 hover:text-white underline underline-offset-4">Try Again</button>
             </div>
           ) : filteredOffers.length === 0 ? (
             <div className="glass-dark rounded-3xl p-12 text-center border-white/5">
@@ -815,7 +818,7 @@ export default function App() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowLogin(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="absolute inset-0 bg-black/60"
             />
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -866,7 +869,7 @@ export default function App() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setShowDashboard(false)}
-              className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+              className="absolute inset-0 bg-black/80"
             />
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
