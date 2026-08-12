@@ -6,7 +6,6 @@ An interactive affiliate referral offers platform with animated 3D black hole ba
 
 - **Black Hole & Coin Swarm Effect**: High-performance GPU-accelerated background animation.
 - **Google Sheets Integration**: Dynamically syncs live referral offers from Google Sheets.
-- **Search & Filter**: Find active referral offers instantly.
 - **Owner Dashboard**: Customize site title, bio, social links, theme accent colors, and cosmic security key.
 - **WhatsApp & Social Integration**: Floating WhatsApp contact button and social header/footer links.
 
